@@ -1,4 +1,3 @@
-#![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
 //! A zipkin http reporter allows reporting spans from rust to a zipkin instance via [v2 spans api](https://zipkin.io/zipkin-api/#/default/post_spans). 
@@ -159,8 +158,11 @@ impl<C: hyper::client::connect::Connect> Builder<C> {
 /// to actually do something it has to be spawned on a future executor.
 #[must_use = "Worker must be polled in order to actually send spans."]
 pub struct Worker {
-    inner: Box<Stream<Item=(),Error=Error> + Send>
+    inner: Box<Stream<Item=(), Error=Error> + Send>
 }
+
+/// Worker can be spawned from a different thread.
+unsafe impl Sync for Worker {}
 
 impl std::fmt::Debug for Worker {
     
