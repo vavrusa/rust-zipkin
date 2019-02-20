@@ -31,6 +31,9 @@ extern crate serde_json;
 extern crate tokio;
 extern crate zipkin;
 
+#[macro_use]
+extern crate log;
+
 use futures::prelude::*;
 use futures::sync::mpsc;
 
@@ -232,7 +235,7 @@ impl<C> Builder<C>
                 match serde_json::to_string( &spans ) {
                     Ok(body) => Some(body),
                     Err(err) => {
-                        eprint!["zipkin-reporter-http: failed to serialize span ( {} ).\n\tThis is probably a bug. Please file a bug report against https://github.com/palantir/rust-zipkin\n", err ];
+                        error!("failed to serialize span ( {} ).\n\tThis is probably a bug. Please file a bug report against https://github.com/palantir/rust-zipkin", err);
                         None
                     }
                 }
@@ -285,8 +288,8 @@ impl<C> Builder<C>
 impl zipkin::Report for Reporter {
 
     fn report2(&self, span: zipkin::Span) {
-        if self.sender.lock().unwrap().try_send( span ).is_err() {
-            eprint!["zipkin-reporter-http: failed to queue span\n"]
+        if let Err(e) = self.sender.lock().unwrap().try_send( span ) {
+            warn!("failed to queue span: {:?}", e);
         }
     }
 

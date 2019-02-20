@@ -60,7 +60,7 @@ impl fmt::Display for Error {
 
 impl error::Error for Error {
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self.inner {
             ErrorInner::Hyper( ref e ) => {
                 Some( e )
@@ -96,7 +96,7 @@ mod test {
         let err = Error{ inner: ErrorInner::Hyper( sender.poll_ready().unwrap_err() ) };
         assert![ err.is_hyper_error() ];
         assert_eq![ err.to_string(), "connection closed" ];
-        let cause = err.cause();
+        let cause = err.source();
         assert![ cause.is_some() ];
         assert_eq![ cause.unwrap().description(), "connection closed" ];
     }
@@ -106,7 +106,7 @@ mod test {
         let err = Error{ inner: ErrorInner::Http( http::StatusCode::INTERNAL_SERVER_ERROR ) };
         assert![ err.is_http_error() ];
         assert_eq![ err.to_string(), "zipkin server replied with status code 500 Internal Server Error" ];
-        assert![ err.cause().is_none() ];
+        assert![ err.source().is_none() ];
         assert_eq![ err.status_code(), Some( http::StatusCode::INTERNAL_SERVER_ERROR ) ];
     }
 

@@ -10,6 +10,7 @@ categories = ["web-programming"]
 keywords = ["zipkin", "tracing"]
 
 [dependencies]
+log = "0.4"
 bytes = "0.4"
 http = "0.1"
 hyper = "0.12"
